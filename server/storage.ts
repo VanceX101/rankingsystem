@@ -71,7 +71,8 @@ export class TursoStorage implements IStorage {
 
   async getUsersByRole(role: string): Promise<User[]> {
     try {
-      return await db.select().from(users).where(eq(users.role, role));
+      const result = await db.select().from(users).where(eq(users.role, role));
+      return result;
     } catch (error) {
       console.error("Error getting users by role:", error);
       throw new Error("Failed to get users by role");
@@ -87,6 +88,7 @@ export class TursoStorage implements IStorage {
           email: users.email,
           role: users.role,
           fullName: users.fullName,
+          password: users.password,
         })
         .from(users)
         .innerJoin(
@@ -101,7 +103,7 @@ export class TursoStorage implements IStorage {
       return result;
     } catch (error) {
       console.error("Error getting assigned employees:", error);
-      throw new Error("Failed to get assigned employees");
+      return []; // Return empty array instead of throwing
     }
   }
 
@@ -137,10 +139,11 @@ export class TursoStorage implements IStorage {
       if (evaluatorId) {
         query = query.where(eq(evaluatorAssignments.evaluatorId, evaluatorId));
       }
-      return await query;
+      const result = await query;
+      return result;
     } catch (error) {
       console.error("Error getting assignments:", error);
-      throw new Error("Failed to get assignments");
+      return []; // Return empty array instead of throwing
     }
   }
 

@@ -1,6 +1,6 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
-import { users } from "@shared/schema";
+import { users, evaluatorAssignments } from "@shared/schema";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 import { eq } from "drizzle-orm";
@@ -22,7 +22,7 @@ async function hashPassword(password: string) {
 
 export async function initializeTestAccounts() {
   try {
-    // Thử tạo bảng users nếu chưa tồn tại
+    // Create users table
     await db.run(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,6 +31,17 @@ export async function initializeTestAccounts() {
         email TEXT NOT NULL,
         role TEXT NOT NULL DEFAULT 'employee',
         full_name TEXT NOT NULL
+      )
+    `);
+
+    // Create evaluator_assignments table
+    await db.run(`
+      CREATE TABLE IF NOT EXISTS evaluator_assignments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        evaluator_id INTEGER NOT NULL,
+        employee_id INTEGER NOT NULL,
+        FOREIGN KEY (evaluator_id) REFERENCES users(id),
+        FOREIGN KEY (employee_id) REFERENCES users(id)
       )
     `);
 
