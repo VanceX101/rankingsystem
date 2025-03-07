@@ -18,7 +18,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Submit evaluation
   app.post("/api/evaluations", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+
     try {
       const evaluation = insertEvaluationSchema.parse(req.body);
       const saved = await storage.createEvaluation(evaluation);
@@ -28,6 +28,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all users (admin only)
+  app.get("/api/users", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(401);
+    }
+    const users = await storage.getAllUsers();
+    res.json(users);
+  });
+
   // Get users by role
   app.get("/api/users/:role", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
@@ -35,16 +44,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(users);
   });
 
-  // Send evaluation reminders
+  // Send evaluation reminders (admin only)
   app.post("/api/send-reminders", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    const users = await storage.getUsersByRole("employee");
-    
-    for (const user of users) {
-      await sendDailyEvaluationEmail(user.email);
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(401);
     }
-    
-    res.sendStatus(200);
+
+    try {
+      const users = await storage.getUsersByRole("employee");
+
+      for (const user of users) {
+        await sendDailyEvaluationEmail(user.email);
+      }
+
+      res.sendStatus(200);
+    } catch (error) {
+      console.error("Error sending reminders:", error);
+      res.status(500).json({ error: "Failed to send reminders" });
+    }
   });
 
   const httpServer = createServer(app);

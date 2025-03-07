@@ -6,8 +6,17 @@ import {
   ClipboardList, 
   LogOut,
   Users,
-  Settings
+  Settings,
+  Star
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type NavItem = {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  roles?: string[];
+};
 
 export default function Sidebar() {
   const [location] = useLocation();
@@ -15,36 +24,59 @@ export default function Sidebar() {
 
   if (!user) return null;
 
-  const navigation = [
-    { name: "Dashboard", href: "/", icon: LayoutDashboard },
-    { name: "Evaluation", href: "/evaluation", icon: ClipboardList },
+  const navigation: NavItem[] = [
+    { 
+      name: "Dashboard", 
+      href: "/", 
+      icon: LayoutDashboard 
+    },
+    { 
+      name: "Evaluation", 
+      href: "/evaluation", 
+      icon: ClipboardList,
+      roles: ["employee", "evaluator"]
+    },
+    { 
+      name: "Users", 
+      href: "/users", 
+      icon: Users,
+      roles: ["admin"]
+    },
+    { 
+      name: "Settings", 
+      href: "/settings", 
+      icon: Settings,
+      roles: ["admin"]
+    }
   ];
 
-  if (user.role === "admin") {
-    navigation.push(
-      { name: "Users", href: "/users", icon: Users },
-      { name: "Settings", href: "/settings", icon: Settings }
-    );
-  }
+  const filteredNavigation = navigation.filter(
+    item => !item.roles || item.roles.includes(user.role)
+  );
 
   return (
-    <div className="w-64 bg-sidebar border-r border-border p-4 flex flex-col h-screen">
-      <div className="flex items-center gap-2 mb-8">
-        <div className="font-bold text-xl">Daily Evaluation</div>
+    <div className="w-64 bg-sidebar border-r border-border flex flex-col h-screen">
+      <div className="p-6 border-b border-border">
+        <div className="flex items-center gap-2">
+          <Star className="h-6 w-6 text-primary" />
+          <span className="font-bold text-xl">Evaluation</span>
+        </div>
       </div>
 
-      <nav className="flex-1">
-        <ul className="space-y-2">
-          {navigation.map((item) => {
+      <nav className="flex-1 p-4">
+        <ul className="space-y-1">
+          {filteredNavigation.map((item) => {
             const Icon = item.icon;
+            const isActive = location === item.href;
+
             return (
               <li key={item.name}>
                 <Link href={item.href}>
-                  <a className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                    location === item.href 
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground" 
-                      : "hover:bg-sidebar-accent/50"
-                  }`}>
+                  <a className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-md transition-colors",
+                    "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  )}>
                     <Icon className="h-5 w-5" />
                     {item.name}
                   </a>
@@ -55,17 +87,17 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      <div className="mt-auto">
-        <div className="px-4 py-2 mb-2">
+      <div className="p-4 border-t border-border">
+        <div className="mb-4">
           <div className="font-medium">{user.fullName}</div>
           <div className="text-sm text-muted-foreground capitalize">{user.role}</div>
         </div>
         <Button 
           variant="outline" 
-          className="w-full justify-start" 
+          className="w-full justify-start gap-2" 
           onClick={() => logoutMutation.mutate()}
         >
-          <LogOut className="h-5 w-5 mr-2" />
+          <LogOut className="h-5 w-5" />
           Logout
         </Button>
       </div>
