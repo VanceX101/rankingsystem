@@ -1,0 +1,109 @@
+
+
+# Product Requirements Document (PRD): Hệ Thống Đánh Giá Nội Bộ Hàng Ngày
+
+## 1. Executive Summary
+Hệ thống Đánh Giá Nội Bộ Hàng Ngày là nền tảng tự động thu thập và tổng hợp phiếu đánh giá từ nhân viên và người đánh giá nhằm cung cấp cái nhìn toàn diện về hiệu suất làm việc của từng cá nhân. Sản phẩm hướng tới cải thiện hiệu quả quản lý nhân sự, tăng cường minh bạch và khuyến khích văn hóa phản hồi liên tục trong doanh nghiệp.
+
+## 2. Product Overview
+- **Mục đích**: Tạo ra một hệ thống đánh giá nhân viên hàng ngày với giao diện hiện đại, dễ sử dụng và tự động hoá, giúp doanh nghiệp theo dõi và nâng cao hiệu suất làm việc.
+- **Phạm vi**: Hệ thống sẽ gửi phiếu đánh giá hàng ngày (từ thứ Hai đến thứ Sáu) tới nhân viên và người đánh giá. Điểm số cuối cùng được tính theo trung bình của 2 phiếu (nhân viên và người đánh giá).
+
+## 3. Objectives
+- **Tăng cường hiệu quả phản hồi**: Đảm bảo mỗi nhân viên nhận được phản hồi liên tục về hiệu suất làm việc.
+- **Cải thiện minh bạch**: Quản trị viên có thể theo dõi và phân tích kết quả đánh giá qua dashboard tổng quan.
+- **Nâng cao trải nghiệm người dùng**: Giao diện UI/UX hiện đại, trực quan và thân thiện với người dùng cuối.
+- **Dễ triển khai và mở rộng**: Hệ thống được xây dựng theo kiến trúc OOP, dễ bảo trì và mở rộng theo nhu cầu tương lai.
+
+## 4. User Personas & Roles
+- **Nhân viên**: 
+  - **Vai trò**: Nhận phiếu đánh giá hàng ngày.
+  - **Quyền hạn**: Xem lịch sử đánh giá cá nhân, truy cập dashboard cá nhân.
+- **Người đánh giá**: 
+  - **Vai trò**: Đánh giá nhân viên dưới quyền.
+  - **Quyền hạn**: Điền phiếu đánh giá cho các nhân viên được phân quyền.
+- **Quản trị viên**: 
+  - **Vai trò**: Quản lý danh sách nhân viên, người đánh giá, cấu hình hệ thống và thiết lập lịch gửi phiếu.
+  - **Quyền hạn**: Toàn quyền truy cập, thay đổi cài đặt hệ thống và xuất báo cáo tổng hợp.
+
+## 5. Key Features and Functionality
+- **Gửi phiếu đánh giá hàng ngày**: Tự động gửi phiếu đánh giá đến nhân viên và người đánh giá theo lịch đã định (có thể tùy chỉnh).
+- **Tính điểm tự động**: Tính toán điểm trung bình từ hai phiếu đánh giá (nhân viên và người đánh giá).
+- **Dashboard tổng quan**: Hiển thị kết quả đánh giá theo ngày/tuần/tháng với biểu đồ và số liệu thống kê chi tiết.
+- **Lịch sử đánh giá cá nhân**: Cho phép nhân viên xem lại điểm số và phản hồi qua các ngày.
+- **Gửi thông báo (Notification)**: Sử dụng email hoặc Web Push để nhắc nhở người dùng hoàn thành phiếu đánh giá.
+- **Phân quyền người dùng**: Hệ thống đảm bảo quản lý quyền truy cập rõ ràng giữa các vai trò (Nhân viên, Người đánh giá, Quản trị viên).
+- **Tùy chỉnh lịch gửi**: Quản trị viên có thể cấu hình ngày gửi phiếu đánh giá linh hoạt.
+
+## 6. System Architecture and Design
+- **Kiến trúc OOP**:
+  - **Entities**:
+    - `User`: Quản lý thông tin và đăng nhập của nhân viên.
+    - `Evaluator`: Thông tin người đánh giá (có thể là một phần của User với quyền đặc biệt).
+    - `Evaluation`: Dữ liệu của phiếu đánh giá, bao gồm các tiêu chí và điểm số.
+    - `Score`: Thành phần tính toán điểm đánh giá cuối cùng.
+  - **Services**:
+    - `EvaluationService`: Xử lý logic đánh giá và tính toán điểm số.
+    - `UserService`: Quản lý thông tin, xác thực và phân quyền người dùng.
+    - `ReportService`: Xuất báo cáo, thống kê và cung cấp dữ liệu cho dashboard.
+  - **Repositories Layer**: Tách biệt logic truy vấn cơ sở dữ liệu nhằm đảm bảo mã nguồn dễ bảo trì và mở rộng.
+  - **Middleware**: Xử lý xác thực, phân quyền và logging, đảm bảo tính bảo mật và kiểm soát truy cập.
+
+## 7. UI/UX Design Guidelines
+- **Thiết kế giao diện hiện đại**:
+  - Sử dụng **Tailwind CSS** hoặc **Material UI** cho thiết kế tinh gọn và chuyên nghiệp.
+  - Hỗ trợ **Dark mode / Light mode** cho trải nghiệm người dùng tối ưu.
+  - **Responsive Design**: Tối ưu hiển thị trên cả desktop, tablet và mobile.
+  - **Animation & Micro-interactions**: Sử dụng các thư viện như Framer Motion để tạo hiệu ứng mượt mà và nâng cao trải nghiệm người dùng.
+  - **Trải nghiệm người dùng mạch lạc**: Luồng người dùng từ thông báo, điền phiếu đánh giá đến xem kết quả trên dashboard được thiết kế rõ ràng và trực quan.
+
+## 8. Technology Stack
+- **Frontend**: Next.js (React) kết hợp với Tailwind CSS hoặc Material UI.
+- **Backend**: Next.js API Routes, xây dựng theo kiến trúc OOP.
+- **Database**: Turso – cơ sở dữ liệu SQLite-based.
+- **Thông báo**: Tích hợp email service hoặc Web Push Notification.
+- **CI/CD**: Triển khai tự động qua các nền tảng như Vercel 
+
+## 9. Database Configuration
+- **Token**:  
+  `eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NDEzNTYwODUsImlkIjoiOWNhYWRiMWEtYWRjNy00OGFhLWJhYTEtODQ1MTM2ZTVhNzkxIn0.cLWphMCZVzT8yrw4DLQBKODDimWjHVtRvuBrUvQEPWnzmjeJ2xeNn-S9ZYYk_eWgOeAaNJPPUwXnS3RJP92HBw`
+- **URL**:  
+  `libsql://growth-system-vancenguyen.turso.io` 
+- Cấu hình này đảm bảo kết nối trơn tru từ backend đến Turso.
+
+## 10. Implementation and Deployment Plan
+1. **Thiết kế UI/UX**:  
+   - Xác định wireframe, prototype và chuẩn hóa giao diện.
+   - Phác thảo các luồng người dùng và xác định trải nghiệm mượt mà.
+2. **Xây dựng API Backend**:  
+   - Thiết lập Next.js API Routes.
+   - Phát triển các service theo mô hình OOP (EvaluationService, UserService, ReportService).
+   - Tích hợp middleware cho xác thực, phân quyền và logging.
+3. **Kết nối với Turso**:  
+   - Cấu hình và kiểm thử kết nối với cơ sở dữ liệu sử dụng token và URL đã cung cấp.
+4. **Phát triển Frontend**:  
+   - Xây dựng các component chính như: EvaluationForm, Dashboard, History, Notifications.
+   - Áp dụng responsive design và hỗ trợ dark/light mode.
+5. **Kiểm thử & Tối ưu Hiệu Năng**:  
+   - Thực hiện unit test, integration test cho backend và frontend.
+   - Đảm bảo hiệu suất API và trải nghiệm người dùng mượt mà.
+6. **Triển khai**:  
+   - Đưa hệ thống lên môi trường thực tế (VD: Vercel, AWS) với CI/CD tự động.
+7. **Hướng dẫn sử dụng & Thu thập Phản hồi**:  
+   - Cung cấp tài liệu hướng dẫn và hệ thống hỗ trợ để nhận phản hồi từ người dùng.
+   - Theo dõi và cải tiến hệ thống liên tục dựa trên phản hồi thu thập được.
+
+## 11. Success Metrics and Monitoring
+- **Tỷ lệ hoàn thành phiếu đánh giá**: Phần trăm nhân viên hoàn thành phiếu đánh giá hàng ngày.
+- **Mức độ hài lòng của người dùng**: Đo lường qua khảo sát và phản hồi từ người dùng cuối.
+- **Hiệu suất hệ thống**: Thời gian phản hồi của API, uptime và khả năng mở rộng khi số lượng người dùng tăng.
+- **Tính chính xác của báo cáo**: Độ chính xác trong việc tổng hợp và hiển thị dữ liệu đánh giá.
+
+## 12. Risk Management and Quality Assurance
+- **Kiểm thử tự động (Automated Testing)**: Unit tests, integration tests cho backend và frontend.
+- **Code Review và Continuous Integration (CI)**: Đảm bảo mã nguồn được kiểm tra định kỳ và tích hợp liên tục.
+- **Giám sát và Logging**: Sử dụng các công cụ giám sát để theo dõi lỗi và hiệu suất hệ thống.
+- **Phản hồi người dùng**: Thu thập và phân tích phản hồi từ người dùng để kịp thời điều chỉnh và cải thiện.
+
+---
+
