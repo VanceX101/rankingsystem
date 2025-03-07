@@ -1,23 +1,21 @@
-import { text, serial, integer, pgEnum, timestamp, pgTable } from "drizzle-orm/pg-core";
+import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const roleEnum = pgEnum("role", ["employee", "evaluator", "admin"]);
-
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email").notNull(),
-  role: roleEnum("role").notNull().default("employee"),
+  role: text("role", { enum: ["employee", "evaluator", "admin"] }).notNull().default("employee"),
   fullName: text("full_name").notNull(),
 });
 
-export const evaluations = pgTable("evaluations", {
-  id: serial("id").primaryKey(),
+export const evaluations = sqliteTable("evaluations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   employeeId: integer("employee_id").references(() => users.id),
   evaluatorId: integer("evaluator_id").references(() => users.id),
-  date: timestamp("date").notNull().defaultNow(),
+  date: integer("date", { mode: "timestamp_ms" }).notNull(),
   productivity: integer("productivity").notNull(),
   quality: integer("quality").notNull(),
   teamwork: integer("teamwork").notNull(),

@@ -1,6 +1,8 @@
 import { users, evaluations, type User, type Evaluation, type InsertUser, type InsertEvaluation } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import { db } from "./database";
+import { eq, or } from "drizzle-orm";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -14,63 +16,49 @@ export interface IStorage {
   sessionStore: session.Store;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private evaluations: Map<number, Evaluation>;
-  private currentUserId: number;
-  private currentEvalId: number;
+export class TursoStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.evaluations = new Map();
-    this.currentUserId = 1;
-    this.currentEvalId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000,
     });
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user = { ...insertUser, id, role: insertUser.role || "employee" };
-    this.users.set(id, user);
-    return user;
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
   }
 
   async getUsersByRole(role: string): Promise<User[]> {
-    return Array.from(this.users.values()).filter(user => user.role === role);
+    return await db.select().from(users).where(eq(users.role, role));
   }
 
   async createEvaluation(evaluation: InsertEvaluation): Promise<Evaluation> {
-    const id = this.currentEvalId++;
-    const newEvaluation = {
-      ...evaluation,
-      id,
-      date: evaluation.date || new Date(),
-      comments: evaluation.comments || null,
-      employeeId: evaluation.employeeId || null,
-      evaluatorId: evaluation.evaluatorId || null
-    };
-    this.evaluations.set(id, newEvaluation);
-    return newEvaluation;
+    const result = await db.insert(evaluations).values(evaluation).returning();
+    return result[0];
   }
 
   async getUserEvaluations(userId: number): Promise<Evaluation[]> {
-    return Array.from(this.evaluations.values()).filter(
-      evaluation => evaluation.employeeId === userId || evaluation.evaluatorId === userId
-    );
+    return await db.select()
+      .from(evaluations)
+      .where(
+        or(
+          eq(evaluations.employeeId, userId),
+          eq(evaluations.evaluatorId, userId)
+        )
+      );
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new TursoStorage();
