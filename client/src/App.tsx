@@ -6,12 +6,13 @@ import { AuthProvider } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
-import EvaluationForm from "@/pages/evaluation-form";
+import MyEvaluations from "@/pages/my-evaluations";
+import EmployeeEvaluations from "@/pages/employee-evaluations";
+import EvaluationHistory from "@/pages/evaluation-history";
 import UsersManagement from "@/pages/users-management";
 import Settings from "@/pages/settings";
 import { ProtectedRoute } from "./lib/protected-route";
 import Sidebar from "./components/layout/sidebar";
-import EvaluationHistory from "@/pages/evaluation-history";
 
 function Router() {
   return (
@@ -21,9 +22,14 @@ function Router() {
         <Switch>
           <ProtectedRoute path="/" component={Dashboard} />
           <ProtectedRoute 
-            path="/evaluation" 
-            component={EvaluationForm} 
+            path="/my-evaluations" 
+            component={MyEvaluations}
             allowedRoles={["employee", "evaluator"]} 
+          />
+          <ProtectedRoute 
+            path="/employee-evaluations" 
+            component={EmployeeEvaluations}
+            allowedRoles={["evaluator"]} 
           />
           <ProtectedRoute 
             path="/evaluation-history" 
@@ -47,7 +53,7 @@ function Router() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -57,5 +63,3 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-export default App;

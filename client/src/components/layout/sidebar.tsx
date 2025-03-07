@@ -32,10 +32,16 @@ export default function Sidebar() {
       icon: LayoutDashboard 
     },
     { 
-      name: "Evaluation", 
-      href: "/evaluation", 
+      name: "My Evaluations", 
+      href: "/my-evaluations", 
       icon: ClipboardList,
       roles: ["employee", "evaluator"]
+    },
+    { 
+      name: "Employee Evaluations", 
+      href: "/employee-evaluations", 
+      icon: Users,
+      roles: ["evaluator"]
     },
     {
       name: "Evaluation History",

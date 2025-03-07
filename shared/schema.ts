@@ -19,15 +19,16 @@ export const evaluatorAssignments = sqliteTable("evaluator_assignments", {
 
 export const evaluations = sqliteTable("evaluations", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  employeeId: integer("employee_id").references(() => users.id),
+  employeeId: integer("employee_id").references(() => users.id).notNull(),
   evaluatorId: integer("evaluator_id").references(() => users.id),
   date: integer("date", { mode: "timestamp_ms" }).notNull(),
+  type: text("type", { enum: ["self", "evaluator"] }).notNull(),
   productivity: integer("productivity").notNull(),
   quality: integer("quality").notNull(),
   teamwork: integer("teamwork").notNull(),
   communication: integer("communication").notNull(),
   comments: text("comments"),
-  type: text("type").notNull(), // 'self' or 'evaluator'
+  status: text("status", { enum: ["draft", "submitted", "reviewed"] }).notNull().default("submitted"),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
