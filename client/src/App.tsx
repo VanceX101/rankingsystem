@@ -11,6 +11,7 @@ import UsersManagement from "@/pages/users-management";
 import Settings from "@/pages/settings";
 import { ProtectedRoute } from "./lib/protected-route";
 import Sidebar from "./components/layout/sidebar";
+import EvaluationHistory from "@/pages/evaluation-history";
 
 function Router() {
   return (
@@ -23,6 +24,10 @@ function Router() {
             path="/evaluation" 
             component={EvaluationForm} 
             allowedRoles={["employee", "evaluator"]} 
+          />
+          <ProtectedRoute 
+            path="/evaluation-history" 
+            component={EvaluationHistory}
           />
           <ProtectedRoute 
             path="/users" 

@@ -7,7 +7,8 @@ import {
   LogOut,
   Users,
   Settings,
-  Star
+  Star,
+  History
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +36,11 @@ export default function Sidebar() {
       href: "/evaluation", 
       icon: ClipboardList,
       roles: ["employee", "evaluator"]
+    },
+    {
+      name: "Evaluation History",
+      href: "/evaluation-history",
+      icon: History
     },
     { 
       name: "Users", 
