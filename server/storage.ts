@@ -1,8 +1,8 @@
-import { users, evaluations, type User, type Evaluation, type InsertUser, type InsertEvaluation } from "@shared/schema";
+import { users, evaluations, evaluatorAssignments, type User, type Evaluation, type InsertUser, type InsertEvaluation, type InsertAssignment, type EvaluatorAssignment } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { db } from "./database";
-import { eq, or } from "drizzle-orm";
+import { eq, or, and } from "drizzle-orm";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -14,6 +14,10 @@ export interface IStorage {
   getUsersByRole(role: string): Promise<User[]>;
   createEvaluation(evaluation: InsertEvaluation): Promise<Evaluation>;
   getUserEvaluations(userId: number): Promise<Evaluation[]>;
+  getAssignedEmployees(evaluatorId: number): Promise<User[]>;
+  createAssignment(assignment: InsertAssignment): Promise<EvaluatorAssignment>;
+  deleteAssignment(evaluatorId: number, employeeId: number): Promise<void>;
+  getAssignments(evaluatorId?: number): Promise<EvaluatorAssignment[]>;
   sessionStore: session.Store;
 }
 
@@ -74,8 +78,83 @@ export class TursoStorage implements IStorage {
     }
   }
 
+  async getAssignedEmployees(evaluatorId: number): Promise<User[]> {
+    try {
+      const result = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          role: users.role,
+          fullName: users.fullName,
+        })
+        .from(users)
+        .innerJoin(
+          evaluatorAssignments,
+          and(
+            eq(evaluatorAssignments.employeeId, users.id),
+            eq(evaluatorAssignments.evaluatorId, evaluatorId)
+          )
+        )
+        .where(eq(users.role, "employee"));
+
+      return result;
+    } catch (error) {
+      console.error("Error getting assigned employees:", error);
+      throw new Error("Failed to get assigned employees");
+    }
+  }
+
+  async createAssignment(assignment: InsertAssignment): Promise<EvaluatorAssignment> {
+    try {
+      const result = await db.insert(evaluatorAssignments).values(assignment).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating assignment:", error);
+      throw new Error("Failed to create assignment");
+    }
+  }
+
+  async deleteAssignment(evaluatorId: number, employeeId: number): Promise<void> {
+    try {
+      await db
+        .delete(evaluatorAssignments)
+        .where(
+          and(
+            eq(evaluatorAssignments.evaluatorId, evaluatorId),
+            eq(evaluatorAssignments.employeeId, employeeId)
+          )
+        );
+    } catch (error) {
+      console.error("Error deleting assignment:", error);
+      throw new Error("Failed to delete assignment");
+    }
+  }
+
+  async getAssignments(evaluatorId?: number): Promise<EvaluatorAssignment[]> {
+    try {
+      let query = db.select().from(evaluatorAssignments);
+      if (evaluatorId) {
+        query = query.where(eq(evaluatorAssignments.evaluatorId, evaluatorId));
+      }
+      return await query;
+    } catch (error) {
+      console.error("Error getting assignments:", error);
+      throw new Error("Failed to get assignments");
+    }
+  }
+
   async createEvaluation(evaluation: InsertEvaluation): Promise<Evaluation> {
     try {
+      // Verify evaluator is assigned to employee if it's an evaluator evaluation
+      if (evaluation.type === "evaluator" && evaluation.evaluatorId && evaluation.employeeId) {
+        const assignments = await this.getAssignments(evaluation.evaluatorId);
+        const isAssigned = assignments.some(a => a.employeeId === evaluation.employeeId);
+        if (!isAssigned) {
+          throw new Error("Evaluator is not assigned to this employee");
+        }
+      }
+
       const result = await db.insert(evaluations).values(evaluation).returning();
       return result[0];
     } catch (error) {

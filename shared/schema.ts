@@ -11,6 +11,12 @@ export const users = sqliteTable("users", {
   fullName: text("full_name").notNull(),
 });
 
+export const evaluatorAssignments = sqliteTable("evaluator_assignments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  evaluatorId: integer("evaluator_id").references(() => users.id).notNull(),
+  employeeId: integer("employee_id").references(() => users.id).notNull(),
+});
+
 export const evaluations = sqliteTable("evaluations", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   employeeId: integer("employee_id").references(() => users.id),
@@ -26,8 +32,11 @@ export const evaluations = sqliteTable("evaluations", {
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertEvaluationSchema = createInsertSchema(evaluations).omit({ id: true });
+export const insertAssignmentSchema = createInsertSchema(evaluatorAssignments).omit({ id: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertEvaluation = z.infer<typeof insertEvaluationSchema>;
+export type InsertAssignment = z.infer<typeof insertAssignmentSchema>;
 export type User = typeof users.$inferSelect;
 export type Evaluation = typeof evaluations.$inferSelect;
+export type EvaluatorAssignment = typeof evaluatorAssignments.$inferSelect;
