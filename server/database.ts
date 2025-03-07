@@ -8,8 +8,8 @@ import { eq } from "drizzle-orm";
 const scryptAsync = promisify(scrypt);
 
 const client = createClient({
-  url: process.env.TURSO_DATABASE_URL || "file:local.db",
-  authToken: process.env.TURSO_AUTH_TOKEN,
+  url: "libsql://rnd-system-vancenguyen.turso.io",
+  authToken: "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NDEzNTc2NDgsImlkIjoiZmNiNzI1ZDAtZGM1Yi00OTgyLTkxYTctODI5NjgxZTM1ZThjIn0.aKyporH7DsMpOVdbVYg_dNnSspxjM7cmtuCJ4N337YzzkBhDui_BIsnJ6PM1dBXEP-idMFgGOmpj9llIGj6nCg"
 });
 
 export const db = drizzle(client);
@@ -22,6 +22,18 @@ async function hashPassword(password: string) {
 
 export async function initializeTestAccounts() {
   try {
+    // Thử tạo bảng users nếu chưa tồn tại
+    await db.run(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        email TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'employee',
+        full_name TEXT NOT NULL
+      )
+    `);
+
     const testAccounts = [
       {
         username: "admin",
@@ -38,7 +50,7 @@ export async function initializeTestAccounts() {
         fullName: "Evaluator User"
       },
       {
-        username: "employee",
+        username: "employee", 
         password: await hashPassword("emp123"),
         email: "employee@example.com",
         role: "employee",
